@@ -24,6 +24,32 @@ document.addEventListener("DOMContentLoaded", (event) => {
     monsterForm.append(name, age, description, createBtn)
     createDiv.append(monsterForm)
 
+    // back and forward btn
+    const backBtn = document.querySelector("#back")
+    const forwardBtn = document.querySelector("#forward")
+
+
+    let allMonsters = [];
+    let start = 1;
+    
+    getMonsters().then(monsters => {
+        allMonsters = monsters;
+        showMonsters(start)
+ 
+        forwardBtn.addEventListener("click", () => {
+            monsterContainer.innerHTML = ""     // clear last 50 monsters
+            start += 50;
+            showMonsters(start);
+        })
+
+        backBtn.addEventListener("click", () => {
+            if (start > 50) {
+                monsterContainer.innerHTML = ""  // clear last 50 monsters
+                start -= 50;
+                showMonsters(start);
+            }
+        })
+    })
 
     // fetch monsters
     function getMonsters() {
@@ -31,16 +57,18 @@ document.addEventListener("DOMContentLoaded", (event) => {
         .then(response => response.json())
     }
 
-
-    getMonsters().then(monsters => {
-        monsters.forEach(monster => renderMonster(monster))
-    })
+    // show monsters
+    function showMonsters(start) {
+        allMonsters.filter(monster => monster.id >= start && monster.id < start + 50)
+        .forEach(monster => renderMonster(monster));
+        window.scrollTo(0,0);
+    }
 
     // render each monster
     function renderMonster(monster) {
         const div = document.createElement("div")
         const name = document.createElement("h2")
-        name.textContent = monster["name"]
+        name.textContent = monster["id"] + '. ' + monster["name"]
 
         const age = document.createElement("h4")
         age.textContent = `Age: ${monster["age"]}`
@@ -53,12 +81,12 @@ document.addEventListener("DOMContentLoaded", (event) => {
     }
 
 
+
     // create new monster 
     createBtn.addEventListener("click", () => {
         monsterForm.addEventListener("submit", (event) => {
             event.preventDefault()
             postMonster(event.target)
-            
         })
     })
 
@@ -77,8 +105,6 @@ document.addEventListener("DOMContentLoaded", (event) => {
         .then(response => response.json())
         .then(newMonster => renderMonster(newMonster))
     }
-
-    
 })
 
 
